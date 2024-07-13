@@ -1,0 +1,61 @@
+services:
+  wordpress:
+    depends_on:
+      - database
+    container_name: Wordpress
+    ports:
+      - 8080:80
+    image: wordpress:6.5.5-php8.1-apache
+    restart: always
+    env_file: .env
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_USER: 'yash'
+      WORDPRESS_DB_PASSWORD: 'pswd'
+      WORDPRESS_DB_NAME: 'db'
+    networks:
+      - wordpress-network
+    volumes:
+      - ./:/var/www/html
+
+      
+  database:
+    mem_limit: 2048m
+    container_name: WP-DB
+    image: mysql:9.0.0
+    restart: always
+    ports:
+      - 3306:3306
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: 'mysql-pswd'
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'yash'
+      MYSQL_PASSWORD: 'yash-mysql'
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress-network
+
+
+  phpmyadmin:
+    depends_on:
+      - database
+    container_name: PHP
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: database
+      MYSQL_ROOT_PASSWORD: 'php-pswd'
+    networks: 
+      - wordpress-network
+    
+
+volumes:
+  db_data:
+
+networks:
+  wordpress-network:
+    driver: bridge
